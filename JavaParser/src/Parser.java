@@ -24,14 +24,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Parser {
 
-    public static void parser(String[] args) throws Exception {
+    public static void parser(String file_name) throws Exception {
         System.out.println("Parsing file...");
 
         // todo replace w/ File file = new File(args[1]);
-        File file = new File("../samples/gedcom_sample_file.GED");
+        File file = new File("../" + file_name);
 
         BufferedReader file_buffer = new BufferedReader(new FileReader(file));
 
@@ -112,27 +113,34 @@ public class Parser {
 
         System.out.println("Writing to Database...");
 
-        String user = "root";
-        String password = "password";
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("(The default user is root: ");
+        System.out.print("Enter the mySQL DB username: ");
+        String user = scanner.nextLine();
+
+
+        System.out.println("(The default password is password: ");
+        System.out.print("Enter the mySQL DB password: ");
+        String password = scanner.nextLine();
 
         DBWriter writer = new DBWriter(user, password);
 
         if (writer.hasConnection()) {
-    //        for (Individual individual : individuals){
-    //            String[] queries = individual.getQueries();
-    //            for (String query: queries){
-    //                System.out.println(query);
-    //                // writer.executeQuery(query);
-    //            }
-    //        }
-    //
-    //        for (Family family : families){
-    //            String[] queries = family.getQueries();
-    //            for (String query: queries){
-    //                System.out.println(query);
-    //                // writer.executeQuery(query);
-    //            }
-    //        }
+            for (Individual individual : individuals){
+                String[] queries = individual.getQueries();
+                for (String query: queries){
+                    System.out.println(query);
+                     writer.executeQuery(query);
+                }
+            }
+
+            for (Family family : families){
+                String[] queries = family.getQueries();
+                for (String query: queries){
+                    System.out.println(query);
+                     writer.executeQuery(query);
+                }
+            }
         }
     }
 }

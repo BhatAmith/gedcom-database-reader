@@ -44,8 +44,8 @@ public class DBWriter {
     private final String create_individuals_events = "CREATE TABLE IndividualEvents ("
             + "ID VARCHAR(10) NOT NULL,"
             + "EventTag VARCHAR(45) NOT NULL,"
-            + "Place CHAR(1),"
-            + "Date VARCHAR(15),"
+            + "Place VARCHAR(45),"
+            + "Date VARCHAR(45),"
             + "PRIMARY KEY (ID, EventTag),"
             + "FOREIGN KEY (ID) REFERENCES Individuals(ID)"
             + ");";
@@ -62,7 +62,7 @@ public class DBWriter {
     private final String create_family_child = "CREATE TABLE FamilyChild ("
             + "FamilyID VARCHAR(10) NOT NULL,"
             + "ChildID VARCHAR(10) NOT NULL,"
-            + "ChildOrder INT NOT NULL,"
+            + "ChildOrder VARCHAR(2) NOT NULL,"
             + "PRIMARY KEY (FamilyID, ChildID),"
             + "FOREIGN KEY (FamilyID) REFERENCES FamilySpouse(FamilyID),"
             + "FOREIGN KEY (ChildID) REFERENCES Individuals(ID)"
@@ -74,9 +74,18 @@ public class DBWriter {
             + "Place CHAR(1),"
             + "Date VARCHAR(15),"
             + "PRIMARY KEY (FamilyID, EventTag),"
-            + "FOREIGN KEY (FamilyID) REFERENCES FamilySpouse(ID)"
+            + "FOREIGN KEY (FamilyID) REFERENCES FamilySpouse(FamilyID)"
             + ");";
 
+    private final String drop_individuals = "DROP TABLE IF EXISTS Individuals";
+
+    private final String drop_individuals_events = "DROP TABLE IF EXISTS IndividualEvents";
+
+    private final String drop_family_spouse = "DROP TABLE IF EXISTS FamilySpouse";
+
+    private final String drop_family_child = "DROP TABLE IF EXISTS FamilyChild";
+
+    private final String drop_family_event = "DROP TABLE IF EXISTS FamilyEvents";
 
     public DBWriter(String user, String password) throws Exception {
         // Attempt connection
@@ -97,14 +106,7 @@ public class DBWriter {
 //            System.out.println("VendorError: " + ex.getErrorCode());
 //        }
         finally{
-            if (conn != null) {
-                try {
-                    conn.close();
-                    System.out.println("Database connection terminated");
 
-                    conn = null;
-                } catch (Exception e) { /* ignore close errors */ }
-            }
         }
 
         stmt = null;
@@ -115,7 +117,12 @@ public class DBWriter {
     public void dropTables(){
         System.out.println("Dropping Tables...");
 
-
+        executeQuery(drop_family_event);
+        executeQuery(drop_family_child);
+        executeQuery(drop_family_spouse);
+        executeQuery(drop_individuals_events);
+        executeQuery(drop_individuals);
+        
         System.out.println("Deletion finished...");
     }
 
@@ -146,7 +153,7 @@ public class DBWriter {
 
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(query);
+            stmt.executeUpdate(query);
 
             // Now do something with the ResultSet ....
             // todo print success?

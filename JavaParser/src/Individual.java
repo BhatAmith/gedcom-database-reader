@@ -113,6 +113,10 @@ public class Individual {
         public Death() {}
     }
 
+    private class Adoption extends Event{
+        public Adoption() {}
+    }
+
     private class Spouse extends Attribute {
         private String family_id;
 
@@ -149,6 +153,7 @@ public class Individual {
     private Birth birth;
     private Baptism baptism;
     private Death death;
+    private Adoption adoption;
     private ArrayList<Spouse> spouses;
     private Child child; // can you belong to more than one family?
     private Flag flag;
@@ -204,7 +209,7 @@ public class Individual {
                 birth = new Birth();
                 current_attribute = birth;
             }
-            else if (attr.equals("BAPT"))
+            else if (attr.equals("BAPM"))
             {
                 baptism = new Baptism();
                 current_attribute = baptism;
@@ -213,6 +218,11 @@ public class Individual {
             {
                 death = new Death();
                 current_attribute = death;
+            }
+            else if (attr.equals("ADOP"))
+            {
+                adoption = new Adoption();
+                current_attribute = adoption;
             }
             else if (attr.equals("FAMS"))
             {
@@ -224,6 +234,10 @@ public class Individual {
             {
                 child = new Child(contents);
                 current_attribute = child;
+            }
+            else {
+                System.out.println("This program does not deal with this attribute: " + line_string);
+                current_attribute = null;
             }
         }
 
@@ -256,29 +270,29 @@ public class Individual {
         // INSERT INTO Individuals (ID, FirstName, LastName) VALUES (12, Ankith, Bhat)
 
         query_command.append("INSERT INTO Individuals (ID");
-        query_values.append("VALUES (" + id);
+        query_values.append("VALUES ('" + id + "'");
 
         if (name != null){
             if (name.hasFirstName()) {
                 query_command.append(", FirstName");
-                query_values.append(", " + name.first_name);
+                query_values.append(", '" + name.first_name + "'");
             }
             if (name.hasMiddleName()) {
                 query_command.append(", MiddleName");
-                query_values.append(", " + name.middle_name);
+                query_values.append(", '" + name.middle_name + "'");
             }
             if (name.hasLastName()) {
                 query_command.append(", LastName");
-                query_values.append(", " + name.last_name);
+                query_values.append(", '" + name.last_name + "'");
             }
         }
         if (sex != null){
             query_command.append(", Sex");
-            query_values.append(", " + sex.sex);
+            query_values.append(", '" + sex.sex + "'");
         }
         if (caste != null){
             query_command.append(", Caste");
-            query_values.append(", " + caste.caste);
+            query_values.append(", '" + caste.caste + "'");
         }
         query_command.append(") ");
         query_values.append(");");
@@ -292,15 +306,15 @@ public class Individual {
             StringBuilder event_query_values = new StringBuilder(100);
 
             event_query_command.append("INSERT INTO IndividualEvents (ID, EventTag");
-            event_query_values.append("VALUES (" + id + ", " + queryType);
+            event_query_values.append("VALUES ('" + id + "', '" + queryType + "'");
 
             if (e.getPlace() != null) {
                 event_query_command.append(", Place");
-                event_query_values.append(", " + e.getPlace());
+                event_query_values.append(", '" + e.getPlace() + "'");
             }
             if (e.getDate() != null) {
                 event_query_command.append(", Date");
-                event_query_values.append(", " + e.getDate());
+                event_query_values.append(", '" + e.getDate() + "'");
             }
 
             event_query_command.append(") ");
@@ -320,7 +334,7 @@ public class Individual {
 
         //Put Caste in main query instead (goes to INDIVIDUALS)
 
-        //Birth, Baptism, and Death treated the same
+        //Birth, Baptism, and Death and Adoption treated the same
         if (birth != null) {
             queries.add(queryHelper("BIRT", birth));
         }
@@ -329,6 +343,9 @@ public class Individual {
         }
         if (death != null){
             queries.add(queryHelper("DEAT", death));;
+        }
+        if (adoption != null){
+            queries.add(queryHelper("ADOP", adoption));
         }
 
 
@@ -354,6 +371,11 @@ public class Individual {
         if (name.first_name != null) name_string.append(name.first_name + " ");
         if (name.middle_name != null) name_string.append(name.middle_name + " ");
         if (name.last_name != null) name_string.append(name.last_name);
+
+        if (birth != null) name_string.append(" birth: " + birth.toString() + "\n");
+        if (baptism != null) name_string.append(" baptism: " + baptism.toString()  + "\n");
+        if (death != null) name_string.append(" death: " + death.toString()  + "\n");
+
 
         return name_string.toString();
     }
